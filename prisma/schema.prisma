@@ -14,18 +14,6 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    createdBy   User   @relation(fields: [createdById], references: [id])
-    createdById String
-
-    @@index([name])
-}
-
 // Necessary for Next auth
 model Account {
     id                       String  @id @default(cuid())
@@ -62,7 +50,7 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
-    posts         Post[]
+    Idea          Idea[]
 }
 
 model VerificationToken {
@@ -71,4 +59,82 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model Idea {
+    id          Int          @id @default(autoincrement())
+    content     String
+    createdAt   DateTime     @default(now())
+    updatedAt   DateTime     @updatedAt
+    essence     IdeaEssence?
+    surveys     Survey[]
+    createdBy   User         @relation(fields: [createdById], references: [id])
+    createdById String
+}
+
+model IdeaEssence {
+    id          Int      @id @default(autoincrement())
+    name        String
+    description String
+    usp         String
+    problem     String
+    solution    String
+    features    String[]
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    idea        Idea     @relation(fields: [ideaId], references: [id])
+    ideaId      Int      @unique
+}
+
+model Survey {
+    id        Int        @id @default(autoincrement())
+    title     String
+    questions Question[]
+    createdAt DateTime   @default(now())
+    updatedAt DateTime   @updatedAt
+    idea      Idea       @relation(fields: [ideaId], references: [id])
+    ideaId    Int
+    responses Response[]
+}
+
+model Question {
+    id        Int        @id @default(autoincrement())
+    content   String
+    createdAt DateTime   @default(now())
+    updatedAt DateTime   @updatedAt
+    survey    Survey     @relation(fields: [surveyId], references: [id])
+    surveyId  Int
+    responses Response[]
+}
+
+model Persona {
+    id          Int        @id @default(autoincrement())
+    name        String
+    age         Int
+    occupation  String
+    goals       String[]
+    challenges  String[]
+    habits      String[]
+    motivations String[]
+    createdAt   DateTime   @default(now())
+    updatedAt   DateTime   @updatedAt
+    responses   Response[]
+}
+
+model Response {
+    id         Int      @id @default(autoincrement())
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+    persona    Persona  @relation(fields: [personaId], references: [id])
+    personaId  Int
+    question   Question @relation(fields: [questionId], references: [id])
+    questionId Int
+    answer     String
+
+    // If you want to capture additional feedback per persona for the survey.
+    likes              String?
+    mainReasonToBuy    String?
+    mainReasonNotToBuy String?
+    Survey             Survey? @relation(fields: [surveyId], references: [id])
+    surveyId           Int?
 }
