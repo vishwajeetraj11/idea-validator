@@ -70,6 +70,8 @@ model Idea {
     surveys     Survey[]
     createdBy   User         @relation(fields: [createdById], references: [id])
     createdById String
+    Question    Question[]
+    Persona     Persona[]
 }
 
 model IdeaEssence {
@@ -104,12 +106,17 @@ model Question {
     updatedAt DateTime   @updatedAt
     survey    Survey     @relation(fields: [surveyId], references: [id])
     surveyId  Int
+    idea      Idea       @relation(fields: [ideaId], references: [id])
+    ideaId    Int
+    section   String
     responses Response[]
 }
 
 model Persona {
     id          Int        @id @default(autoincrement())
     name        String
+    idea        Idea       @relation(fields: [ideaId], references: [id])
+    ideaId      Int
     age         Int
     occupation  String
     goals       String[]
