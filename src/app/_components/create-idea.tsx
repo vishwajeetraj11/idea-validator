@@ -24,6 +24,9 @@ export function CreateIdea() {
   return (
     <>
       <Form
+        initialValues={{
+          content: "",
+        }}
         onSubmit={async ({ content }: Record<string, string>) => {
           const idea = await createIdea.mutateAsync({ content: content ?? "" });
           const ideaEssence = await getIdeaEssence.mutateAsync({
@@ -53,68 +56,71 @@ export function CreateIdea() {
           router.push(`/ideas/${idea.id}`);
         }}
       >
-        {({ handleSubmit, submitting }) => (
-          <form onSubmit={handleSubmit}>
-            <Field
-              name="content"
-              render={({ input }) => (
-                <div className={cn(createIdea.isSuccess ? "hidden" : "")}>
-                  <Label htmlFor="idea">Enter Idea</Label>
+        {({ handleSubmit, submitting, values }) => {
+          return (
+            <form onSubmit={handleSubmit}>
+              <Field
+                name="content"
+                type="text"
+                render={({ input }) => (
+                  <div className={cn(createIdea.isSuccess ? "hidden" : "")}>
+                    <Label htmlFor="idea">Enter Idea</Label>
 
-                  <Textarea
-                    id="idea"
-                    className="mt-2"
-                    onChange={input.onChange}
-                    value={input.value as string}
-                    placeholder="Please enter idea"
-                  />
-                </div>
+                    <Textarea
+                      id="idea"
+                      className="mt-2"
+                      onChange={input.onChange}
+                      value={input.value as string}
+                      placeholder="Please enter idea"
+                    />
+                  </div>
+                )}
+              />
+              <Button
+                className={cn(createIdea.isSuccess ? "hidden" : "")}
+                disabled={!Boolean(values.content?.length)}
+              >
+                {createIdea.isPending ? "Loading..." : "Next"}{" "}
+              </Button>
+              {submitting && (
+                <>
+                  <p>
+                    Idea Essence{" "}
+                    {!getIdeaEssence.isSuccess && getIdeaEssence.isIdle
+                      ? "loading..."
+                      : "loaded"}
+                  </p>
+                  <p>
+                    Survey Form{" "}
+                    {!getSurveyForm.isSuccess && getSurveyForm.isIdle
+                      ? "loading..."
+                      : "loaded"}
+                  </p>
+                  <p>
+                    Persona{" "}
+                    {!getPayingPersona.isSuccess && getPayingPersona.isIdle
+                      ? "generating..."
+                      : "generated"}
+                  </p>
+                  <p>
+                    Persona{" "}
+                    {!personaFillingForm.isSuccess && personaFillingForm.isIdle
+                      ? "Filling..."
+                      : "Filled"}{" "}
+                    Form
+                  </p>
+                  <p>
+                    Insights{" "}
+                    {!getInsights.isSuccess && getInsights.isIdle
+                      ? "Generating..."
+                      : "Generated"}{" "}
+                    Form
+                  </p>
+                </>
               )}
-            />
-            <Button
-              className={cn(createIdea.isSuccess ? "hidden" : "")}
-              disabled={createIdea.isPending}
-            >
-              {createIdea.isPending ? "Loading..." : "Next"}{" "}
-            </Button>
-            {submitting && (
-              <>
-                <p>
-                  Idea Essence{" "}
-                  {!getIdeaEssence.isSuccess && getIdeaEssence.isIdle
-                    ? "loading..."
-                    : "loaded"}
-                </p>
-                <p>
-                  Survey Form{" "}
-                  {!getSurveyForm.isSuccess && getSurveyForm.isIdle
-                    ? "loading..."
-                    : "loaded"}
-                </p>
-                <p>
-                  Persona{" "}
-                  {!getPayingPersona.isSuccess && getPayingPersona.isIdle
-                    ? "generating..."
-                    : "generated"}
-                </p>
-                <p>
-                  Persona{" "}
-                  {!personaFillingForm.isSuccess && personaFillingForm.isIdle
-                    ? "Filling..."
-                    : "Filled"}{" "}
-                  Form
-                </p>
-                <p>
-                  Insights{" "}
-                  {!getInsights.isSuccess && getInsights.isIdle
-                    ? "Generating..."
-                    : "Generated"}{" "}
-                  Form
-                </p>
-              </>
-            )}
-          </form>
-        )}
+            </form>
+          );
+        }}
       </Form>
       <></>
     </>

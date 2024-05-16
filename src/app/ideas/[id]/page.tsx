@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 import { IdeaEssence } from "~/app/_components/idea-essence";
 import Survey from "~/app/_components/survey";
@@ -38,10 +39,15 @@ const ID = async (props: Props) => {
       sortedQuestions[question.section] = [];
     }
   });
-  console.log(survey);
 
   return (
     <div className="mx-auto max-w-[1200px] py-10">
+      <Link className="text-blue-500" href={`/ideas/${ideaId}/results`}>
+        Results
+      </Link>
+      <Link className="ml-4 text-blue-500" href={`/ideas/${ideaId}/personas`}>
+        Personas
+      </Link>
       <div>
         <h2 className="mb-5 text-5xl font-thin">Idea Essence</h2>
         {ideaEssence && <IdeaEssence {...ideaEssence} />}
