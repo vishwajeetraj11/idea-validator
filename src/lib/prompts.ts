@@ -69,7 +69,7 @@ JSON format:
 export const getAnotherPersonaPrompt = () => `Thank you for that last persona! I want you to generate another persona that also would pay for this idea, that is a slightly different archetype / sub-persona than the last persona you helped me generate. In JSON format as above.`
 
 export const getSurveyResponseGeneratorPrompt = (persona1: object, survey: object) => `Have ${JSON.stringify(persona1)} fill out the survey. Additionally, include their thoughts on what they like about the product, the main reason they would want to purchase it, and the main reason they wouldn’t.
-Please send elaborate answers as per different personas.
+Please send elaborate and unique answers relating to and as per different personas.
 The Survey: ${JSON.stringify(survey)};
 
 Send an appropriate JSON response.
@@ -78,6 +78,21 @@ JSON Format:
   formResponse: {personaId: number, surveyResponse: {questionId: number, answer: string}[]}[]
 }
 `
-export const getOverallResultAggregatorPrompt = () => `Based on all of the responses from the personas, synthesize the key insights and provide a readout. Then, provide a PMF viability score from a scale of 1-10, with 1 being low likelihood of PMF and 10 being extremely high likelihood of PMF, with your reasoning for why. List three strengths of this idea, and three weaknesses, as well as three potential enhancements`;
+export const getOverallResultAggregatorPrompt = (responses: object) => `Based on all of the responses from the personas, synthesize the key insights and provide a readout. Then, provide a PMF viability score from a scale of 1-10, with 1 being low likelihood of PMF and 10 being extremely high likelihood of PMF, with your reasoning for why. List three strengths of this idea, and three weaknesses, as well as three potential enhancements.
+
+Responses: ${JSON.stringify(responses)}
+
+Please send an appropriate JSON response 
+{
+  key_insights: string;
+  readout: string;
+  PMF_viability_score: number;
+  reasoning: string;
+  strengths: string[];
+  weaknesses: string[];
+  potential_enhancements: string[];
+}
+
+`;
 
 export const getIndividualQResultAggregatorPrompt = () => `Based on all the responses for this individual question, I want to aggregate the responses and distill the insights, for each question. Give me a readout, with 3-5 insights`

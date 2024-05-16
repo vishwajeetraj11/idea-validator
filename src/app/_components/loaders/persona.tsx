@@ -13,10 +13,10 @@ import { ChevronLeftIcon, ChevronRightIcon } from "../Icons";
 
 const PersonaLoader = () => {
   return (
-    <Carousel className="w-full max-w-4xl">
+    <Carousel className="w-full">
       <CarouselContent>
         {[1, 2, 3].map((_, index) => (
-          <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+          <CarouselItem key={index}>
             <Card className="flex h-full w-full flex-col">
               <CardHeader className="flex items-center gap-4 p-6">
                 <Skeleton className="h-12 w-12 rounded-full" />

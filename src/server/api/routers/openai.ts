@@ -1,9 +1,10 @@
 import { z } from 'zod';
 import { createTRPCRouter, protectedProcedure } from '../trpc';
 import { type Persona, type Survey } from '@prisma/client';
-import { getAnotherPersonaPrompt, getIdeaEssencePrompt, getInitialPayingPersonaPrompt, getSurveyPrompt, getSurveyResponseGeneratorPrompt } from '~/lib/prompts';
+import { getAnotherPersonaPrompt, getIdeaEssencePrompt, getInitialPayingPersonaPrompt, getOverallResultAggregatorPrompt, getSurveyPrompt, getSurveyResponseGeneratorPrompt } from '~/lib/prompts';
 
 import OpenAI from "openai";
+import { getPersonaFormResponse } from '~/lib/openai';
 
 const apiKey = process.env.OPENAI_API_KEY;
 
@@ -188,25 +189,16 @@ export const openAIRouter = createTRPCRouter({
             const personas = await ctx.db.persona.findMany({ where: { ideaId: input.ideaId } });
             if (personas.length < 1) return;
 
-            const formResponsePromises = personas.map(persona => openAI.chat.completions.create({
-                model: "gpt-3.5-turbo-1106",
-                temperature: 1,
-                messages: [
-                    {
-                        role: "user",
-                        content: getSurveyResponseGeneratorPrompt(persona, surveyExists),
-                    },
-                ],
-                response_format: { type: "json_object" },
-            }))
-            if (personas[0]) {
-                console.log(getSurveyResponseGeneratorPrompt(personas?.[0], surveyExists))
-            }
+            const personaResponse = personas[0] ? getPersonaFormResponse(personas[0], surveyExists) : null;
+            const personaResponse2 = personas[1] ? getPersonaFormResponse(personas[1], surveyExists,) : null;
+
+            const formResponsePromises = [personaResponse, personaResponse2]
+
             const unformattedFormResponses = await Promise.all(formResponsePromises);
             const formattedFormResponses = unformattedFormResponses.map(response => {
-                return JSON.parse(response.choices[0]?.message?.content ?? '{}') as { formResponse: { personaId: number, surveyResponse: { questionId: number, answer: string }[] }[] }
+                return JSON.parse(response?.choices[0]?.message?.content ?? '{}') as { formResponse: { personaId: number, surveyResponse: { questionId: number, answer: string }[] }[] }
             });
-            console.log({ formattedFormResponses })
+
             const responses = formattedFormResponses.map(personaResponse => {
                 const response: {
                     personaId: number;
@@ -233,6 +225,77 @@ export const openAIRouter = createTRPCRouter({
             await ctx.db.response.createMany({ data: responses.flat().filter(res => !!res.answer) });
             return {
                 responses
+            }
+        }),
+    getOverallResultAggregator: protectedProcedure
+        .input(z.object({
+            ideaId: z.number(),
+            regenerate: z.boolean().default(false),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            const ideaEssenseExists = await ctx.db.ideaEssence.findUnique({ where: { id: input.ideaId } });
+            if (!ideaEssenseExists) return;
+            if (!input.regenerate) {
+                const insightsExists = await ctx.db.insights.findFirst({ where: { ideaId: input.ideaId } });
+                if (insightsExists) return insightsExists;
+            }
+            const surveyResponses = ctx.db.survey.findFirst({
+                where: { ideaId: input.ideaId },
+                include: {
+                    questions: {
+                        select: {
+                            id: true,
+                            content: true,
+                            section: true,
+                            responses: {
+                                select: {
+                                    answer: true,
+                                    id: true,
+                                    persona: { select: { id: true, name: true } },
+                                }
+                            }
+                        }
+                    }
+                },
+            });
+
+            const aggregationByQuestions = await openAI.chat.completions.create({
+                model: "gpt-3.5-turbo-1106",
+                temperature: 1,
+                messages: [
+                    {
+                        role: "user",
+                        content: getOverallResultAggregatorPrompt(surveyResponses),
+                    },
+                ],
+                response_format: { type: "json_object" },
+            });
+
+            const insights = aggregationByQuestions.choices[0]?.message ? JSON.parse(aggregationByQuestions.choices[0]?.message.content ?? '{}') as {
+                key_insights: string;
+                readout: string;
+                PMF_viability_score: number;
+                reasoning: string;
+                strengths: string[];
+                weaknesses: string[];
+                potential_enhancements: string[];
+            } : null
+            if (!insights) return;
+            await ctx.db.insights.create({
+                data: {
+                    keyInsights: insights.key_insights,
+                    pmfViabilityScore: insights.PMF_viability_score,
+                    potentialEnhancements: insights.potential_enhancements,
+                    readout: insights.readout,
+                    reasoning: insights.reasoning,
+                    strengths: insights.strengths,
+                    weaknesses: insights.weaknesses,
+                    ideaId: input.ideaId,
+                }
+            })
+
+            return {
+                insights
             }
         }),
 });

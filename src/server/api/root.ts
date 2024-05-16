@@ -6,6 +6,7 @@ import { questionRouter } from "~/server/api/routers/question";
 import { responseRouter } from "~/server/api/routers/response";
 import { surveyRouter } from "~/server/api/routers/survey";
 import { openAIRouter } from "./routers/openai";
+import { insightsRouter } from "./routers/insights";
 
 /**
  * This is the primary router for your server.
@@ -19,7 +20,8 @@ export const appRouter = createTRPCRouter({
   question: questionRouter,
   response: responseRouter,
   survey: surveyRouter,
-  openAi: openAIRouter
+  openAi: openAIRouter,
+  insights: insightsRouter
 });
 
 // export type definition of API

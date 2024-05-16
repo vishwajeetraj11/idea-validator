@@ -17,7 +17,6 @@ export default function loading() {
 
       {/* Survey */}
       <h2 className="mb-5 mt-10 text-5xl font-thin">Survey</h2>
-
       {[1, 2, 3, 4].map((_, index) => (
         <Fragment key={index}>
           <Skeleton className="mb-4 mt-4 h-5 w-[60px]" />

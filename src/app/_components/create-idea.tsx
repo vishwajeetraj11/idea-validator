@@ -19,6 +19,7 @@ export function CreateIdea() {
   const getSurveyForm = api.openAi.getSurveyForm.useMutation({});
   const getPayingPersona = api.openAi.getPayingPersona.useMutation({});
   const personaFillingForm = api.openAi.personaFillingForm.useMutation({});
+  const getInsights = api.openAi.getOverallResultAggregator.useMutation({});
 
   return (
     <>
@@ -29,24 +30,30 @@ export function CreateIdea() {
             idea: idea.content,
             ideaId: idea.id,
           });
-          console.log(ideaEssence);
+          // console.log(ideaEssence);
           const surveyPMF = await getSurveyForm.mutateAsync({
             ideaId: idea.id,
           });
-          console.log(surveyPMF);
+          // console.log(surveyPMF);
           if (!surveyPMF) return;
           const persona = await getPayingPersona.mutateAsync({
             ideaId: idea.id,
           });
-          console.log(persona);
+          // console.log(persona);
           const responses = await personaFillingForm.mutateAsync({
             ideaId: idea.id,
             surveyId: surveyPMF.id,
           });
-          console.log(responses);
+          // console.log(responses);
+          const insights = await getInsights.mutateAsync({
+            ideaId: idea.id,
+          });
+          // console.log(insights);
+
+          router.push(`/ideas/${idea.id}`);
         }}
       >
-        {({ handleSubmit }) => (
+        {({ handleSubmit, submitting }) => (
           <form onSubmit={handleSubmit}>
             <Field
               name="content"
@@ -70,34 +77,46 @@ export function CreateIdea() {
             >
               {createIdea.isPending ? "Loading..." : "Next"}{" "}
             </Button>
+            {submitting && (
+              <>
+                <p>
+                  Idea Essence{" "}
+                  {!getIdeaEssence.isSuccess && getIdeaEssence.isIdle
+                    ? "loading..."
+                    : "loaded"}
+                </p>
+                <p>
+                  Survey Form{" "}
+                  {!getSurveyForm.isSuccess && getSurveyForm.isIdle
+                    ? "loading..."
+                    : "loaded"}
+                </p>
+                <p>
+                  Persona{" "}
+                  {!getPayingPersona.isSuccess && getPayingPersona.isIdle
+                    ? "generating..."
+                    : "generated"}
+                </p>
+                <p>
+                  Persona{" "}
+                  {!personaFillingForm.isSuccess && personaFillingForm.isIdle
+                    ? "Filling..."
+                    : "Filled"}{" "}
+                  Form
+                </p>
+                <p>
+                  Insights{" "}
+                  {!getInsights.isSuccess && getInsights.isIdle
+                    ? "Generating..."
+                    : "Generated"}{" "}
+                  Form
+                </p>
+              </>
+            )}
           </form>
         )}
       </Form>
-      <p>
-        Idea Essence{" "}
-        {!getIdeaEssence.isSuccess && getIdeaEssence.isIdle
-          ? "loading..."
-          : "loaded"}
-      </p>
-      <p>
-        Survey Form{" "}
-        {!getSurveyForm.isSuccess && getSurveyForm.isIdle
-          ? "loading..."
-          : "loaded"}
-      </p>
-      <p>
-        Persona{" "}
-        {!getPayingPersona.isSuccess && getPayingPersona.isIdle
-          ? "generating..."
-          : "generated"}
-      </p>
-      <p>
-        Persona{" "}
-        {!personaFillingForm.isSuccess && personaFillingForm.isIdle
-          ? "Filling..."
-          : "Filled"}{" "}
-        Form
-      </p>
+      <></>
     </>
   );
 }

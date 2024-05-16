@@ -1,22 +1,25 @@
 import React from "react";
-import { IdeaEssence } from "~/app/_components/idea-essence";
+import Insights from "~/app/_components/insights";
 import Survey from "~/app/_components/survey";
+import { transformResponseData } from "~/lib/utils";
 import { api } from "~/trpc/server";
 
 type Props = {
   params: { id: string };
 };
 
-const ID = async (props: Props) => {
+const Results = async (props: Props) => {
   const ideaId = props.params.id;
 
-  const ideaEssence = await api.ideaEssence.getIdeaEssenceById({
-    id: parseInt(ideaId),
+  const insights = await api.insights.getInsightByIdeaId({
+    ideaId: parseInt(ideaId),
   });
 
   const survey = await api.survey.getSurveyByIdeaId({
     ideaId: parseInt(ideaId),
   });
+
+  if (!insights) return <></>;
   const sortedQuestions: Record<
     string,
     {
@@ -38,20 +41,25 @@ const ID = async (props: Props) => {
       sortedQuestions[question.section] = [];
     }
   });
-  console.log(survey);
+
+  const responsePerPersona = sortedQuestions
+    ? transformResponseData(sortedQuestions)
+    : null;
 
   return (
-    <div className="mx-auto max-w-[1200px] py-10">
-      <div>
-        <h2 className="mb-5 text-5xl font-thin">Idea Essence</h2>
-        {ideaEssence && <IdeaEssence {...ideaEssence} />}
-      </div>
-
-      {/* Survey */}
-      <h2 className="mb-5 mt-10 text-5xl font-thin">Survey</h2>
-      <Survey sortedQuestion={sortedQuestions} renderResponses={false} />
+    <div className="mx-auto grid min-h-screen w-full max-w-[1200px]">
+      <Insights {...insights} />
+      {/* Responses */}
+      <h2 className="mb-5 mt-10 text-5xl font-thin">Responses</h2>
+      {responsePerPersona && (
+        <Survey
+          renderResponses
+          responsePerPersona={responsePerPersona}
+          sortedQuestion={sortedQuestions}
+        />
+      )}
     </div>
   );
 };
 
-export default ID;
+export default Results;
