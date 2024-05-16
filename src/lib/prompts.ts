@@ -75,7 +75,7 @@ The Survey: ${JSON.stringify(survey)};
 Send an appropriate JSON response.
 JSON Format: 
 {
-  formResponse: {personaId: number, surveyResponse: {questionId: number, answer: string}[]}[]
+  formResponse: {personaId: number, likes:string, mainReasonToBuy: string, mainReasonNotToBuy: string, surveyResponse: {questionId: number, answer: string}[]}[]
 }
 `
 export const getOverallResultAggregatorPrompt = (responses: object) => `Based on all of the responses from the personas, synthesize the key insights and provide a readout. Then, provide a PMF viability score from a scale of 1-10, with 1 being low likelihood of PMF and 10 being extremely high likelihood of PMF, with your reasoning for why. List three strengths of this idea, and three weaknesses, as well as three potential enhancements.

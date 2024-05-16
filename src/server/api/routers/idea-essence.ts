@@ -9,7 +9,6 @@ export const ideaEssenceRouter = createTRPCRouter({
             return ctx.db.idea.create({
                 data: {
                     content: input.content,
-                    createdBy: { connect: { id: ctx.session.user.id } },
                 },
             });
         }),

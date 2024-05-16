@@ -7,7 +7,7 @@ import { api } from "~/trpc/server";
 // type Props = {};
 
 const Ideas = async () => {
-  const data = await api.idea.listUserIdeas();
+  const data = await api.idea.listIdeas();
   return (
     <div className="mx-auto max-w-[1200px]">
       <h1 className="my-10 text-center text-3xl">Ideas</h1>

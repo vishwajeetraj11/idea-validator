@@ -196,9 +196,15 @@ export const openAIRouter = createTRPCRouter({
 
             const unformattedFormResponses = await Promise.all(formResponsePromises);
             const formattedFormResponses = unformattedFormResponses.map(response => {
-                return JSON.parse(response?.choices[0]?.message?.content ?? '{}') as { formResponse: { personaId: number, surveyResponse: { questionId: number, answer: string }[] }[] }
+                return JSON.parse(response?.choices[0]?.message?.content ?? '{}') as { formResponse: { personaId: number, likes: string, mainReasonToBuy: string, mainReasonNotToBuy: string, surveyResponse: { questionId: number, answer: string }[] }[] }
             });
 
+            const personaToUpdate: {
+                personaId: number,
+                likes: string,
+                mainReasonToBuy: string,
+                mainReasonNotToBuy: string,
+            }[] = [];
             const responses = formattedFormResponses.map(personaResponse => {
                 const response: {
                     personaId: number;
@@ -206,7 +212,14 @@ export const openAIRouter = createTRPCRouter({
                     answer: string;
                     surveyId: number;
                 }[] = [];
+
                 personaResponse.formResponse.map(formRes => {
+                    personaToUpdate.push({
+                        personaId: formRes.personaId,
+                        likes: formRes.likes,
+                        mainReasonToBuy: formRes.mainReasonToBuy,
+                        mainReasonNotToBuy: formRes.mainReasonNotToBuy,
+                    })
                     const res = formRes.surveyResponse.map(surveyRes => {
                         const result = {
                             personaId: formRes.personaId,
@@ -218,9 +231,17 @@ export const openAIRouter = createTRPCRouter({
                     })
                     response.push(...res);
                 })
-
                 return response
             })
+            const updatePersonasPromises = personaToUpdate.map(persona => ctx.db.persona.update({
+                where: { id: persona.personaId }, data: {
+                    likes: persona.likes,
+                    mainReasonToBuy: persona.mainReasonToBuy,
+                    mainReasonNotToBuy: persona.mainReasonNotToBuy,
+                }
+            }))
+            await Promise.all(updatePersonasPromises)
+
 
             await ctx.db.response.createMany({ data: responses.flat().filter(res => !!res.answer) });
             return {

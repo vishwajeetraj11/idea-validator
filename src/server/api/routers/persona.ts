@@ -13,6 +13,21 @@ export const personaRouter = createTRPCRouter({
             });
         }),
 
+    getPersonaByIdeaId: protectedProcedure
+        .input(z.object({ ideaId: z.number() }))
+        .query(async ({ ctx, input }) => {
+            return ctx.db.persona.findMany({
+                where: { ideaId: input.ideaId },
+                select: {
+                    likes: true,
+                    mainReasonNotToBuy: true,
+                    mainReasonToBuy: true,
+                    id: true,
+                    name: true
+                }
+            });
+        }),
+
     // List all personas
     listPersonas: protectedProcedure.query(async ({ ctx }): Promise<Persona[]> => {
         return ctx.db.persona.findMany();

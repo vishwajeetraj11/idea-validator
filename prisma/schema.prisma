@@ -50,7 +50,6 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
-    Idea          Idea[]
 }
 
 model VerificationToken {
@@ -62,17 +61,15 @@ model VerificationToken {
 }
 
 model Idea {
-    id          Int          @id @default(autoincrement())
-    content     String
-    createdAt   DateTime     @default(now())
-    updatedAt   DateTime     @updatedAt
-    essence     IdeaEssence?
-    surveys     Survey[]
-    createdBy   User         @relation(fields: [createdById], references: [id])
-    createdById String
-    Question    Question[]
-    Persona     Persona[]
-    Insights    Insights[]
+    id        Int          @id @default(autoincrement())
+    content   String
+    createdAt DateTime     @default(now())
+    updatedAt DateTime     @updatedAt
+    essence   IdeaEssence?
+    surveys   Survey[]
+    Question  Question[]
+    Persona   Persona[]
+    Insights  Insights[]
 }
 
 model IdeaEssence {
@@ -114,19 +111,22 @@ model Question {
 }
 
 model Persona {
-    id          Int        @id @default(autoincrement())
-    name        String
-    idea        Idea       @relation(fields: [ideaId], references: [id])
-    ideaId      Int
-    age         Int
-    occupation  String
-    goals       String[]
-    challenges  String[]
-    habits      String[]
-    motivations String[]
-    createdAt   DateTime   @default(now())
-    updatedAt   DateTime   @updatedAt
-    responses   Response[]
+    id                 Int        @id @default(autoincrement())
+    name               String
+    idea               Idea       @relation(fields: [ideaId], references: [id])
+    ideaId             Int
+    age                Int
+    occupation         String
+    goals              String[]
+    challenges         String[]
+    habits             String[]
+    motivations        String[]
+    createdAt          DateTime   @default(now())
+    updatedAt          DateTime   @updatedAt
+    responses          Response[]
+    likes              String?
+    mainReasonToBuy    String?
+    mainReasonNotToBuy String?
 }
 
 model Response {
@@ -138,13 +138,8 @@ model Response {
     question   Question @relation(fields: [questionId], references: [id])
     questionId Int
     answer     String
-
-    // If you want to capture additional feedback per persona for the survey.
-    likes              String?
-    mainReasonToBuy    String?
-    mainReasonNotToBuy String?
-    Survey             Survey? @relation(fields: [surveyId], references: [id])
-    surveyId           Int?
+    Survey     Survey?  @relation(fields: [surveyId], references: [id])
+    surveyId   Int?
 }
 
 model Insights {

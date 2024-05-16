@@ -65,7 +65,6 @@ export function CreateIdea() {
                 render={({ input }) => (
                   <div className={cn(createIdea.isSuccess ? "hidden" : "")}>
                     <Label htmlFor="idea">Enter Idea</Label>
-
                     <Textarea
                       id="idea"
                       className="mt-2"

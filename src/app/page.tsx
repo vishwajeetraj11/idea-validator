@@ -1,5 +1,5 @@
 import { CreateIdea } from "./_components/create-idea";
-import LogoutButton from "./_components/logout-button";
+// import LogoutButton from "./_components/logout-button";
 
 export default async function Home() {
   return (
@@ -8,7 +8,7 @@ export default async function Home() {
         <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
           Creating Valid Ideas
         </h1>
-        <LogoutButton />
+        {/* <LogoutButton /> */}
         <div className="flex flex-col items-center gap-2">
           <CreateIdea />
         </div>

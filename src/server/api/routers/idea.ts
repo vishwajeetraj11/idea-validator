@@ -10,7 +10,6 @@ export const ideaRouter = createTRPCRouter({
             return ctx.db.idea.create({
                 data: {
                     content: input.content,
-                    createdBy: { connect: { id: ctx.session.user.id } },
                 },
             });
         }),
@@ -29,13 +28,8 @@ export const ideaRouter = createTRPCRouter({
         }),
 
     // List all ideas a user has created
-    listUserIdeas: protectedProcedure.query(async ({ ctx }) => {
-        return ctx.db.idea.findMany({
-            where: { createdById: ctx.session.user.id },
-            include: {
-                essence: true,
-            },
-        });
+    listIdeas: protectedProcedure.query(async ({ ctx }) => {
+        return ctx.db.idea.findMany({});
     }),
 
     // Update an existing idea

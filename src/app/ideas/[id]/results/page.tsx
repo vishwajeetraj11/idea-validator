@@ -19,6 +19,12 @@ const Results = async (props: Props) => {
     ideaId: parseInt(ideaId),
   });
 
+  const personasLikesResponses = await api.persona.getPersonaByIdeaId({
+    ideaId: parseInt(ideaId),
+  });
+
+  console.log(personasLikesResponses);
+
   if (!insights) return <></>;
   const sortedQuestions: Record<
     string,
@@ -43,7 +49,7 @@ const Results = async (props: Props) => {
   });
 
   const responsePerPersona = sortedQuestions
-    ? transformResponseData(sortedQuestions)
+    ? transformResponseData(sortedQuestions, personasLikesResponses)
     : null;
 
   return (
@@ -56,6 +62,7 @@ const Results = async (props: Props) => {
           renderResponses
           responsePerPersona={responsePerPersona}
           sortedQuestion={sortedQuestions}
+          personasLikesResponses={personasLikesResponses}
         />
       )}
     </div>

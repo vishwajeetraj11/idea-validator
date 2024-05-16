@@ -19,12 +19,20 @@ type Props = {
   sortedQuestion: sortedQuestionsType;
   responsePerPersona?: responsePerPersonaType;
   renderResponses: boolean;
+  personasLikesResponses: {
+    id: number;
+    name: string;
+    likes: string | null;
+    mainReasonToBuy: string | null;
+    mainReasonNotToBuy: string | null;
+  }[];
 };
 
 const Survey = ({
   renderResponses = true,
   responsePerPersona,
   sortedQuestion,
+  personasLikesResponses,
 }: Props) => {
   const [type, setType] = useState<"question" | "persona">("question");
   const isQuestion = type === "question" || !renderResponses;
@@ -96,7 +104,10 @@ const Survey = ({
         ))}
       {isPersona && responsePerPersona && renderResponses && (
         <div className="mt-4">
-          <ResponsePerPersona responsePerPersona={responsePerPersona} />
+          <ResponsePerPersona
+            personasLikesResponses={personasLikesResponses}
+            responsePerPersona={responsePerPersona}
+          />
         </div>
       )}
     </>
@@ -105,7 +116,15 @@ const Survey = ({
 
 const ResponsePerPersona = ({
   responsePerPersona,
+  personasLikesResponses,
 }: {
+  personasLikesResponses: {
+    id: number;
+    name: string;
+    likes: string | null;
+    mainReasonToBuy: string | null;
+    mainReasonNotToBuy: string | null;
+  }[];
   responsePerPersona: responsePerPersonaType;
 }) => {
   const [activePersona, setPersona] = useState<string>("");
@@ -119,6 +138,9 @@ const ResponsePerPersona = ({
   };
 
   const activePersonaResponse = responsePerPersona[activePersona];
+  const activePersonaLikes = personasLikesResponses.find(
+    (persona) => persona.name === activePersona,
+  );
 
   return (
     <>
@@ -134,6 +156,29 @@ const ResponsePerPersona = ({
         ))}
       </div>
       <div>
+        {activePersonaLikes && (
+          <>
+            <div className="my-4">
+              <p>{`Likes, Dislikes, Want's to Buy`}</p>
+              <div className="my-2">
+                <p>Likes</p>
+                <p className="text-gray-600">{activePersonaLikes.likes}</p>
+              </div>
+              <div className="my-2">
+                <p>Main Reason to buy</p>
+                <p className="text-gray-600">
+                  {activePersonaLikes.mainReasonNotToBuy}
+                </p>
+              </div>
+              <div className="my-2">
+                <p>Main Reason to not buy</p>
+                <p className="text-gray-600">
+                  {activePersonaLikes.mainReasonToBuy}
+                </p>
+              </div>
+            </div>
+          </>
+        )}
         {activePersonaResponse &&
           Object.entries(activePersonaResponse?.responses).map(
             ([section, questions]) => (

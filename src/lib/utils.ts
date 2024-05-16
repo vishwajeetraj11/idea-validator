@@ -18,6 +18,13 @@ export const transformResponseData = (
       }[];
     }[]
   >,
+  personasLikesResponses?: {
+    id: number;
+    name: string;
+    likes: string | null;
+    mainReasonToBuy: string | null;
+    mainReasonNotToBuy: string | null;
+  }[]
 ) => {
   const result: Record<
     string,
@@ -54,6 +61,7 @@ export const transformResponseData = (
 
         // Add the response to the section array
         result?.[name]?.responses?.[section]?.push({ question, answer, id });
+
       });
     });
   });
