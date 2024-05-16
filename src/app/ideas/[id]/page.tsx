@@ -1,5 +1,7 @@
 import React from "react";
-import { Card, CardContent } from "~/components/ui/card";
+import { IdeaEssence } from "~/app/_components/idea-essence";
+import Persona from "~/app/_components/persona";
+import Survey from "~/app/_components/survey";
 import {
   Carousel,
   CarouselContent,
@@ -7,6 +9,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "~/components/ui/carousel";
+
 import { api } from "~/trpc/server";
 
 type Props = {
@@ -24,71 +27,70 @@ const ID = async (props: Props) => {
     ideaId: parseInt(ideaId),
   });
 
+  console.log(personas);
+
   const survey = await api.survey.getSurveyByIdeaId({
     ideaId: parseInt(ideaId),
   });
 
-  const sortedQuestions: Record<string, string[]> = {};
-  survey?.questions.forEach(
-    (question: { section: string; content: string }) => {
-      if (sortedQuestions[question.section]) {
-        sortedQuestions[question?.section]?.push(question.content);
-      } else {
-        sortedQuestions[question.section] = [];
-      }
-    },
-  );
+  console.log(survey);
+
+  // const responses = await api.response.getResponseById
+
+  const sortedQuestions: Record<
+    string,
+    {
+      question: string;
+      response: {
+        answer?: string;
+        id?: number;
+        persona?: { id?: number; name?: string };
+      }[];
+    }[]
+  > = {};
+  survey?.questions.forEach((question) => {
+    if (sortedQuestions[question.section]) {
+      sortedQuestions[question?.section]?.push({
+        question: question.content,
+        response: question.responses || [],
+      });
+    } else {
+      sortedQuestions[question.section] = [];
+    }
+  });
+
+  console.log(sortedQuestions);
 
   return (
-    <div className="mx-auto max-w-[1200px] pb-10">
+    <div className="mx-auto max-w-[1200px] py-10">
       <div>
         <h2 className="mb-5 text-5xl font-thin">Idea Essence</h2>
-        <p>{ideaEssence?.name}</p>
-        <p>{ideaEssence?.description}</p>
-        <p>{ideaEssence?.usp}</p>
-        <p>{ideaEssence?.problem}</p>
-        <p>{ideaEssence?.solution}</p>
-        {ideaEssence?.features.map((feat: string, i: number) => (
-          <p key={i}>{feat}</p>
-        ))}
+        {ideaEssence && <IdeaEssence {...ideaEssence} />}
       </div>
       {/* Personas */}
-      <h2 className="mb-5 mt-10 text-5xl font-thin">Personas</h2>
-
-      <Carousel className="w-full max-w-[600px]">
-        <CarouselContent>
-          {personas.map((persona, i) => (
-            <div key={i} className="p-1">
-              <Card>
-                <CardContent className="flex aspect-square flex-col p-6">
-                  <p className="mb-2 text-left text-2xl font-light">
-                    {persona.name}
-                  </p>
-                  <p className="text-1xl text-left font-medium">
-                    {persona.age} years old
-                  </p>
-                  <p className="text-1xl text-left font-medium">
-                    {persona.occupation}
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
-      </Carousel>
+      {personas?.length > 0 ? (
+        <>
+          <h2 className="mb-5 mt-10 text-5xl font-thin">Personas</h2>
+          <Carousel className="w-full max-w-4xl">
+            <CarouselContent>
+              {personas.map((persona) => (
+                <CarouselItem
+                  key={persona.id}
+                  className="md:basis-1/2 lg:basis-1/3"
+                >
+                  <Persona {...persona} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
+        </>
+      ) : null}
 
       {/* Survey */}
       <h2 className="mb-5 mt-10 text-5xl font-thin">Survey</h2>
-      {Object.entries(sortedQuestions).map(([section, questions], i) => (
-        <div key={i}>
-          <p className="mb-2 text-xl font-normal">{section}</p>
-          {questions.map((question, i) => (
-            <p key={i}>{question}</p>
-          ))}
-        </div>
-      ))}
+      <Survey sortedQuestion={sortedQuestions} />
     </div>
   );
 };
