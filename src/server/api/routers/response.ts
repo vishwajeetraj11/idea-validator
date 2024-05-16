@@ -28,6 +28,14 @@ export const responseRouter = createTRPCRouter({
                 where: { id: input.id },
             });
         }),
+    // Retrieve a response by survey ID
+    getResponseBySurveyId: protectedProcedure
+        .input(z.object({ surveyId: z.number() }))
+        .query(async ({ ctx, input }): Promise<Response | null> => {
+            return ctx.db.response.findFirst({
+                where: { surveyId: input.surveyId },
+            });
+        }),
 
     // List all responses for a specific question
     listResponsesForQuestion: protectedProcedure

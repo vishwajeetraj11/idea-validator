@@ -25,7 +25,20 @@ export const surveyRouter = createTRPCRouter({
             return ctx.db.survey.findFirst({
                 where: { ideaId: input.ideaId },
                 include: {
-                    questions: true,
+                    questions: {
+                        select: {
+                            id: true,
+                            content: true,
+                            section: true,
+                            responses: {
+                                select: {
+                                    answer: true,
+                                    id: true,
+                                    persona: { select: { id: true, name: true } },
+                                }
+                            }
+                        }
+                    }
                 },
             });
         }),
@@ -63,7 +76,6 @@ export const surveyRouter = createTRPCRouter({
     deleteSurvey: protectedProcedure
         .input(z.object({ id: z.number() }))
         .mutation(async ({ ctx, input }) => {
-            // Consider handling deletion of related questions if necessary
             return ctx.db.survey.delete({
                 where: { id: input.id },
             });
